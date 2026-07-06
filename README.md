@@ -15,24 +15,36 @@ logs Claude Code already writes locally, computes cost from the published
 per-model pricing, and stores the result so you can slice it with SQL (or
 the built-in report methods) instead of scrolling through logs.
 
-## Try it now
+Ships both as a **CLI** (`claude-cost`) and as an importable **Go library**.
 
-This is a library, not a CLI, but there's a runnable example that prints a
-full report against your own machine — no code to write:
-
-```sh
-git clone https://github.com/sazardev/claude-go-expensive
-cd claude-go-expensive
-go run ./examples/report              # ingests ~/.claude/projects
-go run ./examples/report /some/dir    # or a specific directory
-```
-
-It creates `expensive.db` in the current directory. Re-run it any time —
-already-ingested sessions are skipped, changed ones are refreshed.
-
-## Install
+## CLI
 
 Requires Go 1.26+.
+
+```sh
+go install github.com/sazardev/claude-go-expensive/cmd/claude-cost@latest
+```
+
+That drops a `claude-cost` binary in `$(go env GOPATH)/bin` — make sure it's
+on your `PATH`, then run it from anywhere, like any other CLI tool:
+
+```sh
+claude-cost                    # summary + cost by project + top 5 sessions
+claude-cost projects           # cost by project
+claude-cost repos              # cost by repo/clone
+claude-cost sessions -limit 20 # top N sessions
+claude-cost files -limit 20    # top N files
+claude-cost folders -limit 20  # top N folders
+claude-cost version
+claude-cost --help
+```
+
+No setup needed — it ingests `~/.claude/projects` on every run (incremental:
+unchanged sessions are skipped) into `~/.claude-cost/expensive.db`, a fixed
+location so the same history is there no matter where you invoke it from.
+Override with `-db path` / `-logs path` if you need to.
+
+## Go library
 
 ```sh
 go get github.com/sazardev/claude-go-expensive
@@ -86,7 +98,7 @@ Re-running `IngestDir` is cheap and safe: a session file that hasn't changed
 (the common case — Claude Code appends to the active session live) is
 re-parsed and replaces the prior data for that session.
 
-## Reports
+## Reports (library)
 
 `Tracker` exposes:
 
@@ -123,6 +135,9 @@ For anything else, open the SQLite file directly — the schema is in
   multiple clones or worktrees of the same repository up under one project
   instead of fragmenting cost by directory name.
 - **`store`** persists the result to SQLite and answers the report queries.
+- **`cmd/claude-cost`** is a thin CLI over the same `Tracker` API, with a
+  fixed default database location (`~/.claude-cost/expensive.db`) so it
+  behaves like a normal installed tool rather than a per-directory script.
 
 ### Known limitations
 

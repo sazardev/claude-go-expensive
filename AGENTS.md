@@ -2,11 +2,12 @@
 
 ## Project
 
-- Go module `claude-go-expensive`, requires Go 1.26.4.
-- Library that parses Claude Code's own session transcripts
+- Go module `github.com/sazardev/claude-go-expensive`, requires Go 1.26.4.
+- Library + CLI that parses Claude Code's own session transcripts
   (`~/.claude/projects/**/*.jsonl`) into a SQLite database of token usage
-  and cost, by project/repo/folder/file/session/prompt. No CLI, no CI, no
-  remote — see `README.md` for usage.
+  and cost, by project/repo/folder/file/session/prompt.
+- Published: repo is public on GitHub, CI + auto-release on push to `main`
+  (see `.github/workflows/ci.yml`). See `README.md` for usage.
 
 ## Packages
 
@@ -22,6 +23,9 @@
     (same session ID as the parent) into the prompt that spawned them.
   - `gitremote.go` — derives project identity from a repo's git remote
     instead of its directory name.
+- `cmd/claude-cost` — the installable CLI (`go install .../cmd/claude-cost@latest`).
+  Subcommand-then-flags argument order (`claude-cost sessions -limit 20`),
+  fixed default DB at `~/.claude-cost/expensive.db` (cwd-independent).
 
 ## Skills (auto-installed)
 
