@@ -1,0 +1,6 @@
+*.db
+*.db-shm
+*.db-wal
+
+# local editor/tool state, not part of the project
+.serena/

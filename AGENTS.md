@@ -3,7 +3,25 @@
 ## Project
 
 - Go module `claude-go-expensive`, requires Go 1.26.4.
-- Early-stage: no Go source files, no build/test/lint config, no CI, no remote.
+- Library that parses Claude Code's own session transcripts
+  (`~/.claude/projects/**/*.jsonl`) into a SQLite database of token usage
+  and cost, by project/repo/folder/file/session/prompt. No CLI, no CI, no
+  remote — see `README.md` for usage.
+
+## Packages
+
+- `pricing` — Claude model USD-per-token pricing table + cost calculation
+  (`pricing.Usage`/`pricing.Cost`), including Fast Mode rates.
+- `transcript` — parses raw JSONL transcript lines, including the nested
+  `cache_creation` (5m/1h split) and `server_tool_use` usage fields.
+- `store` — SQLite schema, persistence (`SaveSession`), and report queries.
+- root package (`expensive`) — `Tracker` facade: `Open`, `IngestFile`,
+  `IngestDir`, and the report methods.
+  - `ingest.go` — groups transcript entries into prompts/tool calls.
+  - `subagents.go` — folds `<session>/subagents/agent-*.jsonl` transcripts
+    (same session ID as the parent) into the prompt that spawned them.
+  - `gitremote.go` — derives project identity from a repo's git remote
+    instead of its directory name.
 
 ## Skills (auto-installed)
 
@@ -12,13 +30,9 @@ Loaded from `skills-lock.json` based on `go.mod`:
 - `golang-testing` — table-driven tests, subtests, benchmarks
 - `caveman`, `caveman-commit`, `caveman-review` — compressed output
 
-## First-time setup
-
-No `go.sum` yet. Run `go mod tidy` before building or testing.
-
 ## Commands
 
-No standard commands defined yet. When adding them, register in `AGENTS.md`:
 - test: `go test ./...`
-- lint: (none configured)
+- lint: `go vet ./...` (no additional linter configured)
 - typecheck: `go build ./...`
+- tidy: `go mod tidy`
